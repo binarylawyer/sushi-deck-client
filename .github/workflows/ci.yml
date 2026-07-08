@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The kit (@binarylawyer/sushi-deck) is a private repo installed as a git
+      # dependency. Provide a PAT with read access as the KIT_TOKEN secret so
+      # npm can clone it. (The default GITHUB_TOKEN can't reach other repos.)
+      - name: Authenticate to private kit
+        env:
+          KIT_TOKEN: ${{ secrets.KIT_TOKEN }}
+        run: |
+          if [ -n "$KIT_TOKEN" ]; then
+            git config --global url."https://x-access-token:${KIT_TOKEN}@github.com/".insteadOf "https://github.com/"
+          fi
+      - run: npm install
+      - run: npm run typecheck
+      - run: npm run build
