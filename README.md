@@ -1,6 +1,6 @@
-# sushi-deck-client-app
+# sushi-deck-client
 
-> Repo renamed `sushi-deck-app → sushi-deck-client-app` (naming sync, 2026-07-11)
+> Repo renamed `sushi-deck-app → sushi-deck-client` (naming sync, 2026-07-11)
 > to match its Vercel project. It still hosts the API today; the backend
 > extraction into `sushi-deck-backend` is the next change (see `docs/ARCHITECTURE.md §9`).
 
