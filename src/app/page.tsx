@@ -25,9 +25,14 @@ export default async function Home() {
           <h1>Sushi Deck</h1>
           <div className="sub">Gallery</div>
         </div>
-        <Link className="admin" href="/admin">
-          Admin →
-        </Link>
+        <div className="row">
+          <Link className="admin" href="/sushii-world">
+            Sushii World →
+          </Link>
+          <Link className="admin" href="/admin">
+            Admin →
+          </Link>
+        </div>
       </header>
 
       {error ? (
