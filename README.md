@@ -1,36 +1,33 @@
 # sushi-deck-client
 
 > Repo renamed `sushi-deck-app → sushi-deck-client` (naming sync, 2026-07-11)
-> to match its Vercel project. It still hosts the API today; the backend
-> extraction into `sushi-deck-backend` is the next change (see `docs/ARCHITECTURE.md §9`).
+> to match its Vercel project. The compatibility backend extraction has since
+> landed in `binarylawyer/sushi-deck-backend`; the Sushii product consolidation
+> target is now `binarylawyer/sushii-deck`.
 
-The free-standing **Sushi Deck** product. It hosts the deck **API** (CRUD + AI
-generation, backed by Supabase) and the **front-end** (gallery · present ·
-scroll · print-to-PDF) plus a gated **admin** editor. It consumes the portable
+This repository remains the free-standing **Sushi Deck** client/product source during consolidation. Its UI and deployment behavior are evidence-bearing until parity is explicitly proven in `sushii-deck`. The extracted compatibility backend is `sushi-deck-backend`; this client should no longer be treated as the canonical future backend location.
+
+ARCH-10 / SUSHII-DL is **CLOSED at 52/52** in `binarylawyer/sushii-world`. The accepted first-party runtime subject was `binarylawyer/sushii-deck` at `a3eb05f682996bf135fe40b431ef793d3212648a`, not this repository. See [`docs/SUSHII-DL-COMPATIBILITY-STATUS-2026-09-17.md`](docs/SUSHII-DL-COMPATIBILITY-STATUS-2026-09-17.md).
+
+The app consumes the portable
 [`@binarylawyer/sushi-deck-kit`](https://github.com/binarylawyer/sushi-deck-kit)
-kit — this app is just wiring; the deck logic lives in the kit and is unit-tested
-there.
+kit — the deck logic lives in the kit and is unit-tested there.
 
-It's the first of **two consumers** of one deck API: this app **hosts** the API
-(the backend tier), and both front-ends consume it over HTTP with a bearer key —
-`moye-law-os`, and this app's **own** front-end. Under the decided **Option A**
-architecture the app's pages/actions no longer touch Supabase or the LLM
-directly; they call the API through `src/lib/deck-client.ts`, exactly like moye.
-(The old in-process `serverStore()` direct-DB path was removed.) Configure
-`SUSHI_DECK_API_URL` + `SUSHI_DECK_API_KEY` for the app's self-consumption — see
-`.env.example`.
+Under the decided **Option A** architecture the app's pages/actions no longer touch Supabase or the LLM directly; they call the Deck API through `src/lib/deck-client.ts`. Configure `SUSHI_DECK_API_URL` + `SUSHI_DECK_API_KEY` for the app's API consumption — see `.env.example`.
 
 ```
-                     ┌──────────────── sushi-deck-app (this repo) ───────────────┐
-  hosts the API ▶    │  front-end:  gallery · /present · /scroll · Print→PDF      │
-                     │  admin:      <DeckEditor> via gated server actions          │
-                     │  API:        /api/decks (CRUD) · /api/generate              │
-                     └───────────────┬───────────────────────────────┬────────────┘
-                                     │ Supabase (Sushi-Kitchen)       │ Claude API
-                     ┌───────────────┴──── moye-law-os (2nd consumer) ┘
-   calls the API ▶   │  HTTP client with a service key; owner = firm
-                     └───────────────────────────────────────────────
+                     ┌────────────── sushi-deck-client (this repo) ──────────────┐
+                     │  front-end: gallery · /present · /scroll · Print→PDF      │
+                     │  admin:     <DeckEditor> via gated server actions          │
+                     └──────────────────────────┬─────────────────────────────────┘
+                                                │ HTTP + bearer key
+                                                ▼
+                                   sushi-deck-backend compatibility API
+                                                │
+                                Supabase / model provider boundaries
 ```
+
+The broader consolidation target is `binarylawyer/sushii-deck`; this repository is retained until client/product parity and Deck Roll migration decisions are explicitly closed.
 
 ## API
 
@@ -54,25 +51,25 @@ the kit — the exact same behavior the kit unit-tests.
 
 ## Backend
 
-The `decks` table lives in the **Sushi-Kitchen** Supabase project
+The compatibility deployment's `decks` table lives in the **Sushi-Kitchen** Supabase project
 (`awomcxrkxtxwkygoschf`); migration is `supabase/migrations/0001_decks.sql` in
 the kit repo. RLS is enabled with no policies, so only the **service role** can
-read/write — the app is the only path to the data.
+read/write.
+
+This is distinct from the ARCH-10 private production-canary boundary, which used the isolated `sushii_deck` schema and `sushii_deck_app` role. Do not conflate the compatibility deployment model with the accepted Sushii runtime boundary.
 
 ## Develop
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, gate + API keys
+cp .env.example .env.local   # fill in API URL/key plus any local compatibility settings
 npm run dev
 ```
 
 - Gallery: `/` · Present: `/present/<slug>` · Scroll: `/scroll/<slug>`
 - Admin (password-gated): `/admin` — generate, create, edit via `<DeckEditor>`.
 
-The admin UI writes through **gated server actions** (service role stays
-server-side); the bearer-key REST API above is for programmatic consumers like
-`moye-law-os`.
+The admin UI writes through **gated server actions**; the bearer-key REST API is for programmatic consumers.
 
 ```bash
 npm run typecheck
