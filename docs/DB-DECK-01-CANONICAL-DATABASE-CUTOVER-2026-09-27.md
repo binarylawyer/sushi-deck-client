@@ -245,3 +245,52 @@ DB-DECK-01 did not authorize or perform:
 - commerce, wallet, Payload, Medusa, or LiteLLM authority changes.
 
 It retires only the legacy Deck database boundary.
+
+
+## Credential-hygiene closeout
+
+After the normal post-migration production deployment was proven, the Vercel
+project environment was reduced to the canonical database credential only.
+
+Removed from `binarylawyers-projects/sushi-deck-client`:
+
+```text
+SUPABASE_SERVICE_ROLE_KEY  Preview + Production
+SUPABASE_URL               Preview + Production
+DATABASE_URL               Preview branch db-deck-01-canonical-postgres-cutover
+```
+
+Retained:
+
+```text
+DATABASE_URL               Production only
+type                       Secret
+database identity          sushii_deck_app
+```
+
+The temporary VPS transfer file `/root/db-deck-01-database-url` was deleted
+after the Vercel handoff.
+
+A fresh production redeploy from the cleaned environment passed:
+
+```text
+deployment  dpl_FJUdomZvnsBQCztJMHriwkWPaCF5
+source SHA  efa5f9e843c0376496b21412c3914151dc0347a3
+state       READY
+alias       sushi-deck-client-app.vercel.app
+```
+
+Post-cleanup runtime smoke:
+
+- gallery HTTP 200;
+- `product-tour` rendered;
+- deployment marker matched `dpl_FJUdomZvnsBQCztJMHriwkWPaCF5`;
+- unauthenticated `/api/decks` returned HTTP 401.
+
+Current executable source contains no reads of
+`SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL`, or the removed Supabase client
+helper.
+
+`@supabase/supabase-js` remains installed only as a build peer required by the
+pinned Deck Kit barrel export; it is not the runtime persistence path or a
+database authority.
