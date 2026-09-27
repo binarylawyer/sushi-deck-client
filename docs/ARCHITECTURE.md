@@ -8,13 +8,14 @@
 > **Secrets rule:** this file names **env var NAMES only** — never key values.
 >
 > **2026-09-27 DB-DECK-01 supersession:** the historical
-> `public.decks` / `SUPABASE_SERVICE_ROLE_KEY` compatibility persistence
-> described below is being retired. Two production rows were copied exactly to
-> `sushii_deck.decks`; the compatibility API branch now uses PostgreSQL
-> `DATABASE_URL` authenticated as `sushii_deck_app`. The legacy table remains
-> only until the production cutover/revoke smoke completes. See
-> `DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md` for the authoritative
-> migration state.
+> `public.decks` / `SUPABASE_SERVICE_ROLE_KEY` compatibility persistence is
+> retired. The two production rows were migrated exactly to
+> `sushii_deck.decks`; Preview and Production proved the restricted
+> `sushii_deck_app` credential; legacy service-role Deck privileges were
+> revoked; and `public.decks` was dropped with `RESTRICT`. Production now uses
+> PostgreSQL `DATABASE_URL` authenticated as `sushii_deck_app`. See
+> `DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md` for the terminal
+> receipt.
 >
 > _Last updated 2026-07-12: backend live; **data-ownership boundary** codified
 > (client-referencing decks stay client-side). **Final naming (permanent):** kit
@@ -110,30 +111,39 @@ Pure and unit-tested; the API app and every consumer wire it to infra. Modules
 
 ## 4. Database — Supabase project "Sushi-Kitchen"
 
-- **Project:** `Sushi-Kitchen` — ref **`awomcxrkxtxwkygoschf`** — `SUPABASE_URL=https://awomcxrkxtxwkygoschf.supabase.co`.
-- **Table:** `public.decks` — migration lives in the kit at `supabase/migrations/0001_decks.sql`.
+- **Project:** `Sushi-Kitchen` — ref **`awomcxrkxtxwkygoschf`**.
+- **Canonical schema:** `sushii_deck`.
+- **Canonical role:** `sushii_deck_app`.
+- **Canonical table:** `sushii_deck.decks`.
+- **Role search path:** `sushii_deck, pg_catalog`.
 
 ```sql
 decks(
   id uuid pk default gen_random_uuid(),
   slug text not null unique,
   title text not null,
-  deck jsonb not null,     -- the DeckJson
-  theme jsonb,             -- optional brand overrides
-  owner text,              -- app/tenant id (the consumer's owner)
-  version int not null default 1,   -- optimistic concurrency
-  created_at timestamptz, updated_at timestamptz
+  deck jsonb not null,
+  theme jsonb,
+  owner text,
+  version int not null default 1,
+  created_at timestamptz,
+  updated_at timestamptz
 )
 ```
 
-- **Access model:** RLS is **ON with no policies**, and privileges are granted to
-  **`service_role` only** (added in kit migration 0001; a raw-SQL table does not
-  inherit Supabase's grants, which caused the launch-day `permission denied for
-  table decks [42501]`). So **only the secret/service key** can touch `decks` —
-  every read/write flows through the server-side store. `anon`/`authenticated`
-  have no grants.
-- **Owner isolation** is enforced a second time in `SupabaseDeckStore` (kit
-  ≥0.7.0): a store built with an `owner` filters every read/write to that owner.
+The compatibility API connects with `DATABASE_URL` as `sushii_deck_app` and
+uses unqualified `decks` queries, so the pinned role search path resolves only
+to the canonical schema.
+
+RLS is enabled on `sushii_deck.decks`, with policy
+`sushii_deck_app_full_access` scoped to `sushii_deck_app`. The role has only
+the required schema usage and table DML privileges and has no superuser,
+createdb, createrole, replication, or bypass-RLS powers.
+
+Application-level owner filtering remains enforced on every read and write.
+
+The old `public.decks` table and its service-role access model were retired by
+DB-DECK-01 and must not be recreated as a second Deck authority.
 
 ---
 
@@ -155,8 +165,7 @@ decks(
 
 | Name | Purpose |
 |---|---|
-| `SUPABASE_URL` | Sushi-Kitchen project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | the **Secret** key (`sb_secret_…`) — full access, bypasses RLS. NOT the publishable key, NOT a legacy JWT |
+| `DATABASE_URL` | Sensitive PostgreSQL URL authenticating as `sushii_deck_app`; canonical Deck persistence credential |
 | `SUSHI_DECK_API_KEYS` | JSON map `{ "<key>": "<owner>" }` — the allow-list of consumer keys → owners |
 | `SUSHI_DECK_API_KEY` | this app's own key (Option A: its front-end consumes its own API). Resolves to `SUSHI_DECK_ADMIN_OWNER` |
 | `SUSHI_DECK_API_URL` | base URL the front-end calls (defaults to the deployment's own origin) |
@@ -179,7 +188,7 @@ decks(
 
 `createDeckHandlers({ store, llm })` (kit `./api`) mounts these under
 `src/app/api/**`; every route calls `authenticate(req)` → an `owner`, and passes
-it to an owner-scoped `SupabaseDeckStore`.
+it to an owner-scoped PostgreSQL `PostgresDeckStore`.
 
 | Method · Path | Purpose |
 |---|---|
@@ -196,20 +205,23 @@ Errors map to JSON: `422` invalid, `409` conflict, `404` not found, `500`
 
 ---
 
-## 8. Current live state (2026-07-10)
+## 8. Current live state (2026-09-27)
 
-- Backend **live and verified**: `sushi-deck-client` reads/writes `decks`;
-  API returns owner-scoped results for both keys; present/scroll/PDF render.
-- Seeded decks: `product-tour` (owner `sushi-deck`, a full feature showcase) and
-  `moye-welcome` (owner `moye-law-os`, a neutral sample).
-- Kit at **v0.7.1**. Deployment Protection OFF. Supabase grant applied.
-- **moye's 5 firm decks** (estate-audit, patent onboarding, deed-stewardship,
-  document-generation, fiduciary-audit) live as DeckJson in
-  `moye-law-os/src/lib/present/sushi/decks/` and render **client-side** on
-  `/admin/present/sushi` (moye PR #820). By design they are **not** seeded into the
-  shared backend — they reference live matters (see the data-ownership boundary in
-  §1). The only `moye-law-os`-owned row in the backend is the neutral
-  `moye-welcome` sample.
+- Backend **live and verified** on Vercel production deployment
+  `dpl_HrTEcRdeuL3pRNSXqRvNvfMSaJXY`, source SHA
+  `678ae6209de2e715c55f7ffbd83025a280ef90f2`.
+- Production alias remains `https://sushi-deck-client-app.vercel.app`.
+- Persistence is canonical: `sushii_deck_app -> sushii_deck.decks`.
+- `public.decks` is absent.
+- The canonical table contains the two preserved compatibility rows:
+  `product-tour` (owner `sushi-deck`) and `moye-welcome`
+  (owner `moye-law-os`).
+- Terminal canonical digest:
+  `fd8c5469d37c6dca54376149894d04f2`.
+- Production gallery returned HTTP 200 after the legacy table drop and rendered
+  `product-tour`; unauthenticated `/api/decks` returned 401.
+- **moye's firm-specific decks** remain consumer-owned DeckJson in
+  `moye-law-os` and are not migrated into the shared Deck backend.
 
 ---
 
