@@ -85,8 +85,11 @@ Authentication was tightened during the cutover: configured API keys must resolv
 to a non-empty owner. The canonical store was not weakened to accept a null
 tenant.
 
-The local service-role Supabase helper was removed. The app no longer requires
-`@supabase/supabase-js` for persistence.
+The local service-role Supabase helper was removed. Production persistence no
+longer uses `@supabase/supabase-js`. The package remains installed only because
+the pinned Deck Kit `./store` barrel re-exports `SupabaseDeckStore` and its
+optional peer must be present for the current build graph. It is not a database
+authority or runtime persistence path.
 
 ## 01C — Preview and Production acceptance
 
