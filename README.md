@@ -51,12 +51,25 @@ the kit — the exact same behavior the kit unit-tests.
 
 ## Backend
 
-The compatibility deployment's `decks` table lives in the **Sushi-Kitchen** Supabase project
-(`awomcxrkxtxwkygoschf`); migration is `supabase/migrations/0001_decks.sql` in
-the kit repo. RLS is enabled with no policies, so only the **service role** can
-read/write.
+DB-DECK-01 is converging this compatibility deployment on the accepted Sushii
+Deck production database boundary in the **Sushi-Kitchen** Supabase project
+(`awomcxrkxtxwkygoschf`):
 
-This is distinct from the ARCH-10 private production-canary boundary, which used the isolated `sushii_deck` schema and `sushii_deck_app` role. Do not conflate the compatibility deployment model with the accepted Sushii runtime boundary.
+```text
+schema:      sushii_deck
+role:        sushii_deck_app
+table:       sushii_deck.decks
+search_path: sushii_deck, pg_catalog
+```
+
+The two historical compatibility rows have already been copied from
+`public.decks` with exact digest equality. This branch changes the API storage
+adapter to PostgreSQL `DATABASE_URL` using `sushii_deck_app`. The legacy
+`public.decks` table remains temporarily for rollback until the production
+deployment/revoke smoke passes.
+
+See
+[`docs/DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md`](docs/DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md).
 
 ## Develop
 
@@ -80,7 +93,6 @@ npm run build
 
 - The kit is source-only TypeScript, so it's listed in `transpilePackages`
   (see `next.config.mjs`).
-- Tenancy: `owner` is written on create **and** enforced on read — a
-  `SupabaseDeckStore` built with an `owner` filters every read/write to that
-  owner (kit ≥0.7.0), so each consumer sees only its own decks. See
-  `docs/ARCHITECTURE.md §4`.
+- Tenancy: `owner` is written on create **and** enforced on every read/write
+  by the PostgreSQL compatibility store, preserving the same owner boundary as
+  the former `SupabaseDeckStore`.
