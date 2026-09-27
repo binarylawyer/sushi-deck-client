@@ -7,6 +7,15 @@
 >
 > **Secrets rule:** this file names **env var NAMES only** — never key values.
 >
+> **2026-09-27 DB-DECK-01 supersession:** the historical
+> `public.decks` / `SUPABASE_SERVICE_ROLE_KEY` compatibility persistence
+> described below is being retired. Two production rows were copied exactly to
+> `sushii_deck.decks`; the compatibility API branch now uses PostgreSQL
+> `DATABASE_URL` authenticated as `sushii_deck_app`. The legacy table remains
+> only until the production cutover/revoke smoke completes. See
+> `DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md` for the authoritative
+> migration state.
+>
 > _Last updated 2026-07-12: backend live; **data-ownership boundary** codified
 > (client-referencing decks stay client-side). **Final naming (permanent):** kit
 > repo **`sushi-deck-kit`**, npm **`@binarylawyer/sushi-deck-kit`** (v0.9.2);
