@@ -11,7 +11,8 @@ external consumer. Full detail lives in `docs/ARCHITECTURE.md` (read it first).
 
 You own the **Sushi Deck** product as its own project, split out of moye-law-os.
 It is a portable, API-driven presentation/slide-deck builder: one HTTP API
-(Supabase `decks` + Claude) with front-ends as pure, owner-scoped API consumers.
+(canonical PostgreSQL Deck store + Claude) with front-ends as pure,
+owner-scoped API consumers.
 
 ## Bring the repos into scope (clone each inline, one at a time, generous timeout)
 - add_repo binarylawyer/sushi-deck-kit  # the kit @binarylawyer/sushi-deck-kit (v0.9.2)
@@ -26,14 +27,15 @@ Do NOT work in moye-law-os here — that's a separate conversation. moye is only
   project, the Vercel projects, the env-var contract, the two consumers, and the
   current live state. THIS IS THE SPEC.
 - sushi-deck-app `docs/PROJECT.md`-adjacent: `README.md`, `.env.example`,
-  `src/app/api/**`, `src/lib/{deck-api,deck-client,auth,supabase,llm}.ts`.
+  `src/app/api/**`, `src/lib/{deck-api,deck-client,auth,postgres,PostgresDeckStore,llm}.ts`.
 - kit `docs/ARCHITECTURE.md`, `src/{store,api,generate,json}`,
   `supabase/migrations/0001_decks.sql`.
 
 ## Reference facts (names only — never print secret values)
-- Supabase project "Sushi-Kitchen" `awomcxrkxtxwkygoschf`;
-  `SUPABASE_URL=https://awomcxrkxtxwkygoschf.supabase.co`; table `public.decks`
-  (RLS on, granted to service_role only).
+- Supabase project "Sushi-Kitchen" `awomcxrkxtxwkygoschf`; canonical Deck
+  boundary is schema `sushii_deck`, role `sushii_deck_app`, table
+  `sushii_deck.decks`, search path `sushii_deck, pg_catalog`. DB-DECK-01
+  retired `public.decks` and the service-role persistence path.
 - Vercel team `team_6ve0UzALDXNZffWnw2WLbHa8`; backend project
   `sushi-deck-client` `prj_HnKd31eFgMIOBpFlJz2ydRs83xIR`. Repo `sushi-deck-client`
   = Vercel project `sushi-deck-client` (names match). NOTE: the production domain
@@ -44,8 +46,9 @@ Do NOT work in moye-law-os here — that's a separate conversation. moye is only
   Supabase project.
 
 ## Current state (working — do not re-litigate)
-- Backend is LIVE: reads/writes `decks`, owner-scoped API, present/scroll/PDF all
-  verified. Deployment Protection OFF. Supabase grant applied. Kit v0.7.1.
+- Backend is LIVE on the canonical `sushii_deck_app -> sushii_deck.decks`
+  database path; owner-scoped API and production gallery are verified.
+  DB-DECK-01 is CLOSED and `public.decks` is absent.
 - Seeded: `product-tour` (owner `sushi-deck`, feature showcase) and `moye-welcome`
   (owner `moye-law-os`).
 - Consumers: sushi-deck-app's own front-end (owner `sushi-deck`) and moye-law-os
