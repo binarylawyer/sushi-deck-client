@@ -29,16 +29,28 @@ Do not infer that client/UI parity, Vercel cutover, backend cutover, URL migrati
 
 Do not delete/archive this repo until explicit parity/migration closeout.
 
-## 3. Compatibility data distinction
+## 3. Compatibility data cutover
 
-The compatibility deployment's older shared `public.decks` / service-role model is distinct from the accepted private Sushii production canary:
+DB-DECK-01 is the separately reviewed migration authority for the compatibility
+database boundary. Read
+`docs/DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md` before changing
+Deck persistence.
+
+Accepted current state on this branch:
 
 ```text
-schema: sushii_deck
-role:   sushii_deck_app
+canonical schema: sushii_deck
+canonical role:   sushii_deck_app
+legacy table:     public.decks
 ```
 
-Do not treat successful ARCH-10 canary evidence as authority to migrate/drop compatibility data or change this client's production backend.
+DB-DECK-01A copied the two legacy rows into `sushii_deck.decks` with exact
+bidirectional equality and matching digest. The legacy table remains intact
+until the compatibility deployment is proven on `sushii_deck_app`.
+
+Do not revoke `service_role` from or drop `public.decks` before the
+DB-DECK-01C production smoke passes. After that gate, the legacy surface should
+be retired rather than treated as a second authority.
 
 ## 4. CI classification
 
