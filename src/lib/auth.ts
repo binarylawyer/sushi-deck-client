@@ -7,7 +7,7 @@
  * admin UI does not use this path; it uses gated server actions.
  */
 export interface ApiIdentity {
-  owner: string | null;
+  owner: string;
 }
 
 function parseKeys(): Record<string, string> {
@@ -28,7 +28,8 @@ export function authenticate(req: Request): ApiIdentity | null {
   if (!token) return null;
   const keys = parseKeys();
   if (Object.prototype.hasOwnProperty.call(keys, token)) {
-    return { owner: keys[token] };
+    const owner = keys[token]?.trim();
+    if (owner) return { owner };
   }
   return null;
 }
