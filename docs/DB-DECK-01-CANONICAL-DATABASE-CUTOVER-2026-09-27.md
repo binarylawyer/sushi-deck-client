@@ -1,7 +1,7 @@
 # DB-DECK-01 — Canonical Deck database cutover
 
 **Date:** 2026-09-27  
-**Status:** IN PROGRESS — data migration complete; compatibility deployment cutover pending  
+**Status:** IN PROGRESS — data migration complete; compatibility source cutover builds READY; Vercel DATABASE_URL handoff and runtime cutover pending  
 **Supabase project:** `awomcxrkxtxwkygoschf`
 
 ## Purpose
@@ -130,3 +130,39 @@ This cutover retires one compatibility data boundary. It does not by itself
 authorize repository archival, domain changes, public ingress, customer traffic,
 or removal of compatibility UI/evidence. Those remain governed by the broader
 Sushii Deck parity/consolidation program.
+
+
+## 2026-09-27 source/build checkpoint
+
+Compatibility cutover PR:
+
+```text
+binarylawyer/sushi-deck-client#14
+head 33bc0bdf569bbd18283c2963cfd007ffb920308d
+```
+
+The first preview builds exposed a compile-time authority mismatch: the old API
+identity contract allowed `owner: string | null`, while the canonical
+PostgreSQL store requires an actual tenant owner. The fix tightened
+`ApiIdentity.owner` to `string` and rejects configured API keys whose owner
+value is empty. The store was not weakened.
+
+Vercel preview after that fix:
+
+```text
+deployment dpl_FeNYp2F6p3csqSKMw4oAgD96TJTs
+state      READY
+target     preview
+```
+
+GitHub Actions for the PR remains CI_DEFERRED: the workflow run completes with a
+job record but zero executed steps. It is not counted as a source PASS or FAIL.
+
+Production is still on the pre-cutover main deployment. No legacy privilege has
+been revoked and `public.decks` remains present.
+
+The next required operator boundary is adding a Sensitive `DATABASE_URL` to the
+Vercel `sushi-deck-client` project for Preview and Production, with the value
+derived from the existing Supabase Vault
+`sushii_deck_app_database_password_v1` secret. The value must never be pasted
+into Git, chat, logs, or ordinary shell history.
