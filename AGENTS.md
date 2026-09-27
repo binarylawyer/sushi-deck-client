@@ -36,21 +36,22 @@ database boundary. Read
 `docs/DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md` before changing
 Deck persistence.
 
-Accepted current state on this branch:
+Accepted current state:
 
 ```text
 canonical schema: sushii_deck
 canonical role:   sushii_deck_app
-legacy table:     public.decks
+canonical table:  sushii_deck.decks
+legacy table:     absent
 ```
 
-DB-DECK-01A copied the two legacy rows into `sushii_deck.decks` with exact
-bidirectional equality and matching digest. The legacy table remains intact
-until the compatibility deployment is proven on `sushii_deck_app`.
+DB-DECK-01 is CLOSED. The two legacy rows were migrated with exact digest
+equality, Preview and Production proved the restricted role, `service_role`
+Deck privileges were revoked, post-revoke production smoke passed, and
+`public.decks` was dropped with `RESTRICT`.
 
-Do not revoke `service_role` from or drop `public.decks` before the
-DB-DECK-01C production smoke passes. After that gate, the legacy surface should
-be retired rather than treated as a second authority.
+Do not recreate `public.decks`, restore service-role Deck persistence, or add a
+second Deck database authority without a separately reviewed migration.
 
 ## 4. CI classification
 

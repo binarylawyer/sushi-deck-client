@@ -51,9 +51,9 @@ the kit — the exact same behavior the kit unit-tests.
 
 ## Backend
 
-DB-DECK-01 is converging this compatibility deployment on the accepted Sushii
-Deck production database boundary in the **Sushi-Kitchen** Supabase project
-(`awomcxrkxtxwkygoschf`):
+DB-DECK-01 is **CLOSED**. This compatibility deployment now uses the accepted
+Sushii Deck production database boundary in the **Sushi-Kitchen** Supabase
+project (`awomcxrkxtxwkygoschf`):
 
 ```text
 schema:      sushii_deck
@@ -62,11 +62,11 @@ table:       sushii_deck.decks
 search_path: sushii_deck, pg_catalog
 ```
 
-The two historical compatibility rows have already been copied from
-`public.decks` with exact digest equality. This branch changes the API storage
-adapter to PostgreSQL `DATABASE_URL` using `sushii_deck_app`. The legacy
-`public.decks` table remains temporarily for rollback until the production
-deployment/revoke smoke passes.
+The two historical compatibility rows were copied with exact digest equality.
+Production now uses PostgreSQL `DATABASE_URL` authenticated as
+`sushii_deck_app`. The legacy `public.decks` table has been dropped after a
+successful privilege-revoke and production smoke; it is no longer an authority
+or fallback.
 
 See
 [`docs/DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md`](docs/DB-DECK-01-CANONICAL-DATABASE-CUTOVER-2026-09-27.md).
