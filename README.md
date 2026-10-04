@@ -96,3 +96,7 @@ npm run build
 - Tenancy: `owner` is written on create **and** enforced on every read/write
   by the PostgreSQL compatibility store, preserving the same owner boundary as
   the former `SupabaseDeckStore`.
+
+## Local Docker rehearsal
+
+See [the local web runbook](deployment/web/README.md) for the independent localhost:13680 stack, dependency lockfile, canonical World reference link and acceptance boundaries.

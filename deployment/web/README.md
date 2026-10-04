@@ -28,3 +28,5 @@ shell still start independently. No copy of World artwork is placed in this clie
 
 For Linux hosting, build for the server architecture, supply approved runtime
 configuration and put the app behind HTTPS routing before production cutover.
+
+Evidence: [2026-10-04 receipt](evidence/2026-10-04.json) and [gallery image](evidence/2026-10-04-gallery.png).
