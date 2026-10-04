@@ -6,7 +6,7 @@ import re
 
 def get(path="/", expected=200, port=13680, with_headers=False):
     c = http.client.HTTPConnection("127.0.0.1", port, timeout=15)
-    c.request("GET", path)
+    c.request("GET", path, headers={"Host": "localhost"})
     r = c.getresponse()
     body = r.read()
     status = r.status
