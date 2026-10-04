@@ -17,10 +17,14 @@ The gallery and admin gates therefore show their existing unconfigured state.
 Positive login, deck creation/editing, persistence and model generation remain
 unverified. The read-only API check must reject anonymous requests.
 
-The installed Deck Kit reference HTML currently contains a path to a past
-upload instead of the actual World briefing. A successful HTTP status alone
-does not prove that presentation works; the local checker validates content
-and reports partial acceptance until the canonical source is recovered.
+The initial reference request failed: the pinned kit has a path-only artifact,
+and the bundled module could not resolve the exported presentation. This
+local Compose stack sets SUSHII_WORLD_LOCAL_BRIEFING_ORIGIN to
+http://localhost:13380, so /sushii-world redirects to the restored canonical
+World briefing. Only loopback HTTP origins are accepted by this local option;
+when unset, the existing package-backed behavior is unchanged. World must be
+running for the briefing link and its acceptance check; the gallery and admin
+shell still start independently. No copy of World artwork is placed in this client.
 
 For Linux hosting, build for the server architecture, supply approved runtime
 configuration and put the app behind HTTPS routing before production cutover.
