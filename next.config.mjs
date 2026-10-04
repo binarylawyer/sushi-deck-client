@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   // The kit ships TypeScript source (no build step), so Next must transpile it.
   transpilePackages: ["@binarylawyer/sushi-deck-kit"],
   // Sushii World is a package-owned reference artifact read by Node routes at
