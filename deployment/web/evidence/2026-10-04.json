@@ -1,0 +1,183 @@
+{
+  "capturedAt": "2026-10-04T21:02:25.848161+00:00",
+  "kind": "local_docker_website_rehearsal_followup",
+  "sourceRevisionBuilt": "11c86de9de699c70c823041e2f9f59781ac4aa0c",
+  "configurationRevisionChecked": "ddbec40838c4b268b86457200d3611a6a79d165f",
+  "image": {
+    "id": "sha256:2c70cee0c1c80cc14ebdd1ef0d9e1438d7faf3879188f9ee41c6a8508f4f5f27",
+    "tags": [
+      "sushii-deck-client-web:local"
+    ],
+    "os": "linux",
+    "architecture": "arm64",
+    "revision": "11c86de9de699c70c823041e2f9f59781ac4aa0c"
+  },
+  "build": {
+    "exitCode": 0,
+    "fullLogSha256": "e02ec4f31c133ed60054c5c8a875486a847cee64031b811f6d17abbcfa2897cf",
+    "builderMemoryGiB": 3,
+    "builderCpuLimit": 2,
+    "hostedCIExecuted": false
+  },
+  "httpCheck": {
+    "exitCode": 0,
+    "stdout": "{\"site\": \"deck-client\", \"passed\": \"gallery shell, admin response, anonymous API denial, homepage assets, local canonical World briefing\", \"status\": \"pass\", \"failures\": [], \"authenticated_workflows\": \"not configured\"}\n",
+    "stderr": "",
+    "scriptSha256": "f6008bc70e0ce07f38058fd94b23b5db0206d0b6df1d6ede4030b349fa552b5f"
+  },
+  "productionReady": false,
+  "limitations": [
+    "Local linux/arm64 images only.",
+    "No positive authenticated/API persistence workflows verified.",
+    "No production DNS, provider configuration or database changes."
+  ],
+  "initialReferenceFailure": {
+    "exitCode": 1,
+    "stdout": "{\"site\": \"deck-client\", \"passed\": \"gallery shell, admin response, anonymous API denial, homepage assets\", \"status\": \"partial\", \"failures\": [\"('/sushii-world', 500, b'Sushii World presentation is unavailable.')\"], \"authenticated_workflows\": \"not configured\"}\n",
+    "stderr": ""
+  },
+  "browserGallery": [
+    {
+      "args": [
+        "open",
+        "http://localhost:13680"
+      ],
+      "exit": 0,
+      "stdout": "\u2713 Sushi Deck\n  http://localhost:13680/\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "wait",
+        "--load",
+        "networkidle"
+      ],
+      "exit": 0,
+      "stdout": "\u2713 Done\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "snapshot",
+        "-i"
+      ],
+      "exit": 0,
+      "stdout": "- heading \"Sushi Deck\" [level=1, ref=e1]\n- link \"Sushii World \u2192\" [ref=e2]\n- link \"Admin \u2192\" [ref=e3]\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "errors"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "console"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "screenshot",
+        "/Users/cmoye/Projects/sushii-web-local-20261004/deck-client-local.png"
+      ],
+      "exit": 0,
+      "stdout": "\u2713 Screenshot saved to /Users/cmoye/Projects/sushii-web-local-20261004/deck-client-local.png\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "close"
+      ],
+      "exit": 0,
+      "stdout": "\u2713 Browser closed\n",
+      "stderr": ""
+    }
+  ],
+  "browserReference": [
+    {
+      "args": [
+        "click",
+        "@e2"
+      ],
+      "exit": 0,
+      "stdout": "\u2713 Done\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "wait",
+        "--load",
+        "networkidle"
+      ],
+      "exit": 0,
+      "stdout": "\u2713 Done\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "get",
+        "url"
+      ],
+      "exit": 0,
+      "stdout": "http://localhost:13380/presentations/sushii-world/#s1\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "eval",
+        "JSON.stringify({slides:document.querySelectorAll(\"section.slide\").length,allImagesLoaded:[...document.images].every(i=>i.complete&&i.naturalWidth>0)})"
+      ],
+      "exit": 0,
+      "stdout": "\"{\\\"slides\\\":19,\\\"allImagesLoaded\\\":true}\"\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "errors"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "close"
+      ],
+      "exit": 0,
+      "stdout": "\u2713 Browser closed\n",
+      "stderr": ""
+    }
+  ],
+  "localOriginGuard": {
+    "exit": 0,
+    "stdout": "{\"check\":\"non-loopback local origin rejected\",\"status\":503,\"pass\":true}\n",
+    "stderr": ""
+  },
+  "independentRestart": {
+    "stack": "deck-client",
+    "stopped_listener_closed": true,
+    "other_sites": {
+      "moye": 200,
+      "platform": 200,
+      "kitchen": 200,
+      "world": 200,
+      "atelier": 200,
+      "medusa-admin": 200
+    },
+    "restarted_status": 200
+  },
+  "verificationCorrection": "The first cross-site HTTP probe used 127.0.0.1 as Host and received the intended portal-to-public redirect. Corrected the probe to Host localhost; application routing unchanged.",
+  "referenceBoundary": "Local Compose sets the loopback-only World origin; the compatibility package fallback remains unchanged when this local option is unset.",
+  "lockfile": {
+    "sha256": "5b27d51493dc766145daacbe577255734fbdac4319fc20589c0ac13d009cbdb4",
+    "format": 3,
+    "packageCount": 88,
+    "deckKitCommit": "d49546d800ae0afe35c9672d7624f503811da94c"
+  }
+}

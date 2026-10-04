@@ -1,0 +1,21 @@
+name: sushii-deck-client-local
+services:
+  web:
+    image: sushii-deck-client-web:local
+    environment:
+      SUSHII_WORLD_LOCAL_BRIEFING_ORIGIN: http://localhost:13380
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /app/.next/cache:size=64m,uid=1000,gid=1000,mode=0755
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ["127.0.0.1:13680:3000"]
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}

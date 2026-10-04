@@ -1,0 +1,7 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "deploy/deck-client-local-web-20261004": false
+    }
+  }
+}

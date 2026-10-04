@@ -19,6 +19,21 @@ function addClientBase(html: string): string {
 
 export async function GET() {
   try {
+    // The local portfolio consumes World's canonical briefing without copying it
+    // into the compatibility client. Production behavior is unchanged when unset.
+    const localOrigin = process.env.SUSHII_WORLD_LOCAL_BRIEFING_ORIGIN;
+    if (localOrigin) {
+      const origin = new URL(localOrigin);
+      if (
+        origin.protocol !== "http:" ||
+        !["localhost", "127.0.0.1"].includes(origin.hostname) ||
+        origin.username || origin.password || origin.pathname !== "/" ||
+        origin.search || origin.hash
+      ) {
+        return new Response("Invalid local World briefing origin.", { status: 503 });
+      }
+      return Response.redirect(new URL("/presentations/sushii-world", origin), 307);
+    }
     const presentationPath = require.resolve(PRESENTATION_EXPORT);
     const html = await readFile(presentationPath, "utf8");
 
